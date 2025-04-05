@@ -15,6 +15,7 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const UserRegister = () => {
   const [name, setName] = useState("");
@@ -26,6 +27,7 @@ const UserRegister = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+  const [pressed, setPressed] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -52,6 +54,7 @@ const UserRegister = () => {
     };
 
     try {
+      setPressed(true);
       const response = await UserService.register(registerData);
       setRegisterResult(response.data);
       console.log("Registro exitoso", response.data);
@@ -60,7 +63,7 @@ const UserRegister = () => {
       setOpenSnackbar(true);
       setTimeout(() => {
         navigate('/login'); // Redirigir a la página de inicio de sesión después del registro
-      }, 3000);
+      }, 1500);
     } catch (error) {
       console.log("Error al registrar", error);
       if (error.response && error.response.data) {
@@ -161,6 +164,12 @@ const UserRegister = () => {
         </Button>
       </FormControl>
 
+      {registerResult === null && name && password1 && password2 && selectedUserRole && pressed&&(
+        <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
+          <CircularProgress />
+        </Box>
+      )}
+
       {registerResult && (
         <Card variant="outlined" style={{ padding: '16px', marginTop: '16px' }}>
           <CardContent>
@@ -170,6 +179,33 @@ const UserRegister = () => {
           </CardContent>
         </Card>
       )}
+      <Snackbar
+              open={openSnackbar}
+              autoHideDuration={6000}
+              onClose={handleCloseSnackbar}
+              anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+              sx={{ 
+                '& .MuiSnackbarContent-root': {
+                  minWidth: '400px', 
+                  maxWidth: '600px',
+                }
+              }}
+            >
+              <Alert
+                onClose={handleCloseSnackbar}
+                severity={snackbarSeverity}
+                sx={{ 
+                  width: '100%',
+                  fontSize: '1.2rem',
+                  padding: '16px 24px',
+                  '& .MuiAlert-icon': {
+                    fontSize: '2rem',
+                  }
+                }}
+              >
+                {snackbarMessage}
+              </Alert>
+            </Snackbar>
     </Box>
   );
 };

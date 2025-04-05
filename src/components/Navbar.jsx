@@ -30,19 +30,20 @@ export default function Navbar() {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="fixed">
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <IconButton
+          <Button
             size="large"
             edge="start"
             color="inherit"
             aria-label="menu"
             sx={{ mr: 2 }}
             onClick={toggleDrawer(true)}
+            startIcon={<MenuIcon />}
           >
-            <MenuIcon />
-          </IconButton>
+            Menú
+          </Button>
 
           <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
-            <Typography variant="h4" component="div" sx={{ display: 'inline' }}>
+            <Typography variant="h4" component="div" sx={{ display: 'inline', fontWeight: 'bold' }}>
               PrestaBanco
             </Typography>
           </Box>
@@ -51,20 +52,44 @@ export default function Navbar() {
               <>
                 <IconButton color="inherit">
                   <AccountCircleIcon />
-                  <Typography variant="body1" sx={{ ml: 1 }}>
+                  <Typography variant="body1" sx={{ ml: 1, fontWeight: 'bold' }}>
                     {auth.user.name}
                   </Typography>
                 </IconButton>
-                <Button color="inherit" onClick={handleLogout}>
+                <Button color="inherit" onClick={handleLogout}
+                            sx={{ 
+                              mr: 2, 
+                              border: '2px solid', 
+                              borderColor: 'white', 
+                              backgroundColor: 'red', 
+                              color: 'white',
+                              fontWeight: 'bold'
+                            }}>
                   Cerrar Sesión
                 </Button>
               </>
             ) : (
               <>
-                <Button color="inherit" onClick={() => navigate('/login')}>
+                <Button color="inherit" onClick={() => navigate('/login')} sx={{ fontWeight: 'bold' }}
+                   sx={{ 
+                    mr: 2, 
+                    border: '2px solid', 
+                    borderColor: 'black', 
+                    backgroundColor: 'green', 
+                    color: 'white',
+                    fontWeight: 'bold'
+                  }}>
                   Iniciar Sesión
                 </Button>
-                <Button color="inherit" onClick={() => navigate('/register')}>
+                <Button color="inherit" onClick={() => navigate('/register')}
+                              sx={{ 
+                                mr: 2, 
+                                border: '2px solid', 
+                                borderColor: 'black', 
+                                backgroundColor: 'blue', 
+                                color: 'white',
+                                fontWeight: 'bold'
+                              }}>
                   Registrarse
                 </Button>
               </>

@@ -1,10 +1,10 @@
 import httpClient from "../http-common";
 
 const simulate = data => {
-    return httpClient.post('/api/v1/simulate/', data);
+    return httpClient.post('/simulate', data);
 }
 
-const getAll = () => {
+const getasda = () => {
     return httpClient.get('/api/v1/employees/');
 }
 
@@ -23,4 +23,4 @@ const update = data => {
 const remove = id => {
     return httpClient.delete(`/api/v1/employees/${id}`);
 }
-export default { getAll, create, get, update, remove, simulate };
+export default { getasda, create, get, update, remove, simulate };
