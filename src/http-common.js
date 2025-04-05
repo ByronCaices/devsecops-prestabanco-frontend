@@ -7,7 +7,8 @@ console.log(prestabancoBackendServer)
 console.log(prestabancoBackendPort)
 
 export default axios.create({
-    baseURL: `http://${prestabancoBackendServer}:${prestabancoBackendPort}`,
+    //baseURL: `http://${prestabancoBackendServer}:${prestabancoBackendPort}`,
+    baseURL: 'http://34.28.62.239:8090',
     headers: {
         'Content-Type': 'application/json'
     }
