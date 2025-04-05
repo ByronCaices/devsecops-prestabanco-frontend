@@ -1,6 +1,4 @@
-import React, { useEffect } from 'react';
-import {useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import MCSimulationService from '../services/MCSimulationService';
 import MCTypesService from '../services/MCTypesService';
 
@@ -15,44 +13,54 @@ import Select from '@mui/material/Select';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-
+import CircularProgress from '@mui/material/CircularProgress';
+import Grid from '@mui/material/Grid';
+import InputAdornment from '@mui/material/InputAdornment';
 
 const MCSimulation = () => {
-  const [loanAmount, setLoanAmonut] = useState("");
+  const [loanAmount, setLoanAmount] = useState("");
   const [annualInterestRate, setAnnualInterestRate] = useState("");
   const [loanTerm, setLoanTerm] = useState("");
   const [mcTypes, setMCTypes] = useState([]);
   const [selectedMCType, setSelectedMCType] = useState("");
   const [simulationResult, setSimulationResult] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [annualInterestRateLimits, setAnnualInterestRateLimits] = useState({min:0,max:0});
+  const [annualInterestRateLimits, setAnnualInterestRateLimits] = useState({ min: 0, max: 0 });
   const [loanTermLimit, setLoanTermLimit] = useState(0);
+  const [simulationParams, setSimulationParams] = useState({
+    loanAmount: "",
+    annualInterestRate: "",
+    loanTerm: "",
+  });
 
   useEffect(() => {
     const getMCTypes = async () => {
       try {
+        setIsLoading(true);
         const response = await MCTypesService.getAll();
         setMCTypes(response.data);
-      } catch (error){
-        console.log("Error al cargar los tipos", error);  
+      } catch (error) {
+        console.log("Error al cargar los tipos", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     getMCTypes();
-  },[]);
-
+  }, []);
 
   const handleTypeChange = (event) => {
     const selectedTypeId = event.target.value;
     setSelectedMCType(selectedTypeId);
 
-  const selectedMCType = mcTypes.find(type => type.id === selectedTypeId);
-    if(selectedMCType){
+    const selectedMCType = mcTypes.find(type => type.id === selectedTypeId);
+    if (selectedMCType) {
       setAnnualInterestRateLimits({
-        min:selectedMCType.min_interest_rate,
-        max:selectedMCType.max_interest_rate,
+        min: selectedMCType.min_interest_rate,
+        max: selectedMCType.max_interest_rate,
       });
-      setLoanTermLimit(selectedMCType.max_term);    
+      setLoanTermLimit(selectedMCType.max_term);
     }
   };
 
@@ -60,142 +68,199 @@ const MCSimulation = () => {
     e.preventDefault();
 
     const mcSimulation = {
-      loanAmount:parseInt(loanAmount),
+      loanAmount: parseInt(loanAmount.replace(/\./g, '')),
       annualInterestRate: parseFloat(annualInterestRate),
-      loanTerm:parseInt(loanTerm)
+      loanTerm: parseInt(loanTerm),
     };
 
+    setSimulationParams({
+      loanAmount,
+      annualInterestRate,
+      loanTerm,
+    });
+
+    setIsLoading(true);
     MCSimulationService
       .simulate(mcSimulation)
       .then((response) => {
         setSimulationResult(response.data);
-        console.log("Simulacion exitosa",response.data);
+        console.log("Simulación exitosa", response.data);
       })
-      .catch ((error) => {
+      .catch((error) => {
         console.log("Error al simular", error);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-  }
+  };
 
-    // Validaciones para los campos
-    const isLoanAmountValid = loanAmount >= 0 && loanAmount!=0;
-    const isAnnualInterestRateValid = annualInterestRate >= annualInterestRateLimits.min && annualInterestRate <= annualInterestRateLimits.max && annualInterestRate!=0;
-    const isLoanTermValid = loanTerm >= 0 && loanTerm <= loanTermLimit && loanTerm!= 0;
-  
-    // Determinar si el botón debe estar habilitado
-    const isButtonDisabled = !(isLoanAmountValid && isAnnualInterestRateValid && isLoanTermValid);
+  const isLoanAmountValid = loanAmount !== "" && parseInt(loanAmount.replace(/\./g, '')) > 0 && parseInt(loanAmount.replace(/\./g, '')) <= 9999999999;
+  const isAnnualInterestRateValid = annualInterestRate >= annualInterestRateLimits.min && annualInterestRate <= annualInterestRateLimits.max && annualInterestRate !== 0;
+  const isLoanTermValid = loanTerm >= 1 && loanTerm <= loanTermLimit;
+
+  const isButtonDisabled = !(isLoanAmountValid && isAnnualInterestRateValid && isLoanTermValid && selectedMCType !== "");
+
+  const getValidationStyle = (isValid) => ({ color: isValid ? 'inherit' : 'red' });
 
   return (
-    <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        component="form"
-      >
-        <h3> Simular Crédito Bancario Chile</h3>
-        <hr />
-        
+    <Grid container spacing={2} sx={{ width: '90%', margin: 'auto', mt: 4 }}>
+      {/* FORMULARIO */}
+      <Grid item xs={12} md={6}>
+        <Box component="form" display="flex" flexDirection="column" gap={2}>
+          <Typography variant="h4" align="center" gutterBottom>
+            Simular Crédito Bancario
+          </Typography>
           <FormControl fullWidth>
             <InputLabel id="mctypes-lists">Tipo de Crédito Hipotecario</InputLabel>
             <Select
               labelId='mctypes-lists'
               value={selectedMCType}
               onChange={handleTypeChange}
-              displayEmpty
             >
-            {mcTypes.map(mctype => (
-              <MenuItem key={mctype.id} value={mctype.id}>
-                {mctype.type}
-              </MenuItem>
-            ))}
-        </Select>
-      </FormControl>
-      <br />
+              {mcTypes.map(mctype => (
+                <MenuItem key={mctype.id} value={mctype.id}>
+                  {mctype.type}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-          <FormControl fullWidth>
-            <TextField
-              id="loan-amount"
-              label="Monto del préstamo"
-              variant='outlined'
-              type="number"
-              size="small"
-              value={loanAmount}
-              onChange={(e) => setLoanAmonut(e.target.value)}
-            />
-            <Typography variant="caption" color="textSecondary">
-              En CLP.
-            </Typography>
-          </FormControl>
-          <br />
-          <FormControl fullWidth>
-            <TextField
-              id="annual-interest-rate"
-              label="Interés Anual"
-              variant='outlined'
-              type="number"
-              size="small"
-              value={annualInterestRate}
-              onChange={(e) => setAnnualInterestRate(e.target.value)}
-              inputProps={{
-                min:annualInterestRateLimits.min,
-                max:annualInterestRateLimits.max
-              }}
-            />
-            {selectedMCType && (
-            <Typography variant="caption" color="textSecondary">
-              Indique un valor entre {annualInterestRateLimits.min}% y {annualInterestRateLimits.max}%.
-            </Typography>
-            )}
-          </FormControl>
-          <br />
-          <FormControl fullWidth>
-            <TextField
-              id="loan-term"
-              label="Plazo en Años"
-              variant='outlined'
-              type="number"
-              size="small"
-              value={loanTerm}
-              onChange={(e) => setLoanTerm(e.target.value)}
-              inputProps={{
-                max: loanTermLimit
-              }}
-            />
-            {selectedMCType && (
-              <Typography variant="caption" color ="textSecondary">
-                Indique un valor entre 1 y {loanTermLimit} Años.
-              </Typography>
-            )}
-          </FormControl>
-          <br />
-        <FormControl>  
+          <TextField
+            label="Monto del préstamo"
+            value={loanAmount}
+            onChange={(e) => setLoanAmount(e.target.value.replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.'))}
+            fullWidth
+            error={(loanAmount !== "" && selectedMCType === "") || loanAmount!== "" && !isLoanAmountValid}
+            helperText={
+              loanAmount === "" && selectedMCType !== ""  // Si está vacío pero se ha seleccionado un tipo
+                ? <span style={getValidationStyle(true)}>Límite: $1 - $9.999.999.999</span>
+                : loanAmount === ""  // Si está vacío
+                  ? ""
+                  : (loanAmount !== "" && selectedMCType === "")  // Si hay un valor pero no se ha seleccionado un tipo
+                    ? "Por favor seleccione un tipo de Crédito Hipotecario"
+                    : (loanAmount < 1 || loanAmount > 9999999999)  // Si está fuera del límite
+                        ? <span style={getValidationStyle(false)}>Límite: $1 - $9.999.999.999</span>
+                        : <span style={getValidationStyle(true)}>Límite: $1 - $9.999.999.999</span>
+            }
+            InputProps={{
+              startAdornment: <InputAdornment position="start">$</InputAdornment>,  // Símbolo antes del campo
+            }}
+          />
+
+          <TextField
+            label="Interés Anual"
+            value={annualInterestRate}
+            onChange={(e) => {
+              let value = e.target.value;
+            
+              // Permitir solo números enteros y decimales con "." o ","
+              if (/^\d*([.,]?\d*)?$/.test(value)) {
+                // Reemplazar "," por "." para asegurar compatibilidad numérica
+                value = value.replace(',', '.');
+                setAnnualInterestRate(value);
+              }
+            }}          
+            fullWidth
+            error={(annualInterestRate !== "" && selectedMCType === "") || annualInterestRate!== "" && !isAnnualInterestRateValid}
+            helperText={
+              annualInterestRate === "" && selectedMCType !== "" // Si está vacío pero se ha seleccionado un tipo
+                ? <span style={getValidationStyle(true)}>
+                    Límite: {annualInterestRateLimits.min}% - {annualInterestRateLimits.max}%
+                  </span>
+                : annualInterestRate === "" // Si está vacío
+                  ? ""
+                  : selectedMCType === "" // Si hay un valor pero no se ha seleccionado un tipo
+                    ? "Por favor seleccione un tipo de Crédito Hipotecario"
+                    : (annualInterestRate < annualInterestRateLimits.min || annualInterestRate > annualInterestRateLimits.max) // Si está fuera del límite
+                      ? <span style={getValidationStyle(false)}>
+                          Límite: {annualInterestRateLimits.min}% - {annualInterestRateLimits.max}%
+                        </span>
+                      : <span style={getValidationStyle(true)}>
+                          Límite: {annualInterestRateLimits.min}% - {annualInterestRateLimits.max}%
+                        </span>
+            }            
+            InputProps={{
+              endAdornment: <InputAdornment position="end">%</InputAdornment>,
+            }}
+          />
+
+<TextField
+  label="Plazo en Años"
+  value={loanTerm}
+  onChange={(e) => {
+    let value = e.target.value;
+    // Solo permitir números y no permitir puntos decimales
+    if (/^\d*$/.test(value)) {
+      setLoanTerm(value);
+    }
+  }}
+  fullWidth
+  error={(loanTerm !== "" && selectedMCType === "") || loanTerm!=="" && !isLoanTermValid} // Aquí se controla ambas condiciones
+  helperText={
+    loanTerm === "" && selectedMCType !== ""  // Si está vacío pero se ha seleccionado un tipo
+      ? <span style={getValidationStyle(true)}>Límite: 1 - {loanTermLimit} años</span>
+      : loanTerm === ""  // Si está vacío
+        ? ""
+        : (loanTerm !== "" && selectedMCType === "")  // Si hay un valor pero no se ha seleccionado un tipo
+          ? "Por favor seleccione un tipo de Crédito Hipotecario"
+          : (loanTerm < 1 || loanTerm > loanTermLimit)  // Si está fuera del límite
+              ? <span style={getValidationStyle(false)}>Límite: 1 - {loanTermLimit} años</span>
+              : <span style={getValidationStyle(true)}>Límite: 1 - {loanTermLimit} años</span>
+  }
+  InputProps={{
+    endAdornment: <InputAdornment position="end">Años</InputAdornment>,
+  }}
+/>
+
           <Button
             variant="contained"
             color="info"
-            onClick={(e) => simulateMC(e)}
-            style={{ marginLeft: "0.5rem" }}
+            onClick={simulateMC}
             startIcon={<MonetizationOnIcon />}
             disabled={isButtonDisabled}
           >
             Simular Crédito
           </Button>
-        </FormControl>
+        </Box>
+      </Grid>
 
-        {simulationResult &&(
-          <Card variant="outlined" style={{ padding: '16px' }}>
-          <CardContent>
-              <Typography variant="body1">
-                <strong>Cuota Mensual:</strong> {simulationResult} <strong>CLP</strong>
-              </Typography>
-          </CardContent>
-        </Card>
-        )}
-        
+{/* RESULTADO */}
+<Grid item xs={12} md={6}>
+  <Card>
+    <CardContent>
+      <Typography variant="h5" gutterBottom>
+        Resultado de la Simulación
+      </Typography>
+      {isLoading ? (
+        <CircularProgress />
+      ) : simulationResult ? (
+        <>
+          <Typography>
+            <strong>Monto del Préstamo:</strong> ${simulationParams.loanAmount}
+          </Typography>
+          <Typography>
+          <strong>Interés Anual:</strong> {simulationParams.annualInterestRate.toLocaleString()}%
+          </Typography>
+          <Typography>
+            <strong>Plazo:</strong> {simulationParams.loanTerm} años
+          </Typography>
+          <Typography variant="h6" mt={2}>
+          <strong>Valor Mensualidad (CLP):</strong> ${simulationResult.toLocaleString()}
+          </Typography>
+
+        </>
+      ) : (
+        <Typography>
+          Realiza una simulación para ver el resultado aquí.
+        </Typography>
+      )}
+    </CardContent>
+  </Card>
+</Grid>
 
 
-
-      </Box>
-      
+    </Grid>
   );
 };
+
 export default MCSimulation;

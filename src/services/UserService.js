@@ -1,11 +1,15 @@
 import httpClient from "../http-common";
 
 const login = data => {
-    return httpClient.post('/api/v1/user/login',data)
+    return httpClient.post('/user/login',data)
 }
 
 const register = data => {
-    return httpClient.post('/api/v1/user/register',data)
+    return httpClient.post('/user/register',data)
 }
 
-export default {login,register};
+const getNameById = id => {
+    return httpClient.get(`/user/getNameById/${id}`)
+}
+
+export default {login,register,getNameById};

@@ -8,6 +8,9 @@ import UserLogin from './components/UserLogin';
 import UserRegister from './components/UserRegister'
 import { AuthProvider } from './context/AuthContext';
 import MCApplication from './components/MCApplication';
+import MCTracking from './components/MCTracking';
+import MCEvaluationList from './components/MCEvaluationList';
+import MCEvaluation from './components/MCEvaluation';
 
 function App() {
   return (
@@ -22,7 +25,10 @@ function App() {
             <Route path="/login" element={<UserLogin />} />
             <Route path='/register' element={<UserRegister />} />
             <Route path='/mcapplication' element={<MCApplication/>} />
+            <Route path='/tracking' element={<MCTracking/>} />
+            <Route path='/evaluation' element={<MCEvaluationList/>} />
             <Route path="*" element={<NotFound />} />
+            <Route path="/evaluation/:id" element={<MCEvaluation/>} />
           </Routes>
         </div>
       </Router>
