@@ -17,7 +17,7 @@ const Home = () => {
   // Herramientas según rol
   const menuItemsByRole = {
     guest: [
-      { icon: <MonetizationOnIcon />, title: 'Simula tu Crédito', path: '/simulation', description: 'Obtén un cálculo estimado de tu crédito hipotecario.' },
+      { icon: <MonetizationOnIcon />, title: 'SimulAAAAAA tu Crédito', path: '/simulation', description: 'Obtén un cálculo estimado de tu crédito hipotecario.' },
       { 
         icon: <RequestQuoteIcon />, 
         title: 'Solicita tu Crédito', 
