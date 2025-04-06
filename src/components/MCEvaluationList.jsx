@@ -17,9 +17,12 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import HomeIcon from '@mui/icons-material/Home';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import TextField from '@mui/material/TextField';
+import UserService from '../services/UserService';
 
 const MCEvaluationList = () => {
   const [applications, setApplications] = useState([]);
+  const [filteredApplications, setFilteredApplications] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [mcTypes, setMCTypes] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState({});
@@ -28,12 +31,17 @@ const MCEvaluationList = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const { auth } = useAuth();
   const navigate = useNavigate();
+  const [searchUser, setSearchUser] = useState("");
+  const [userNames, setUserNames] = useState({}); // Estado para almacenar los nombres de los usuarios
+ 
 
   useEffect(() => {
     const fetchApplications = async () => {
       try {
         const response = await MCEvaluationService.getAllApplications();
         setApplications(response.data);
+        setFilteredApplications(response.data); // Inicialmente, mostrar todas las aplicaciones
+        await fetchUserNames(response.data); // Cargar nombres de usuarios
       } catch (error) {
         console.log("Error al cargar las aplicaciones", error);
       }
@@ -56,11 +64,40 @@ const MCEvaluationList = () => {
         console.log("Error al cargar los tipos de préstamo", error);
       }
     };
+    const fetchUserNames = async (applications) => {
+      const userIds = applications.map((app) => app.client);
+      const uniqueUserIds = [...new Set(userIds)];
+      const userNamesMap = {};
+    
+      for (const userId of uniqueUserIds) {
+        try {
+          const response = await UserService.getNameById(userId);
+          userNamesMap[userId] = response.data.name; // Extraer solo el nombre del usuario
+        } catch (error) {
+          console.log(`Error al obtener el nombre del usuario con ID ${userId}`, error);
+          userNamesMap[userId] = 'Desconocido';
+        }
+      }
+    
+      setUserNames(userNamesMap);
+    };
 
     fetchApplications();
     fetchStatuses();
     fetchMCTypes();
   }, []);
+
+  const handleSearch = () => {
+    if (searchUser.trim() === "") {
+      setFilteredApplications(applications); // Mostrar todas las aplicaciones si no hay búsqueda
+    } else {
+      const filtered = applications.filter(app => {
+        const userName = userNames[app.client]; // Obtén el nombre del usuario
+        return userName?.toLowerCase().includes(searchUser.toLowerCase()); // Verifica si incluye el texto buscado
+      });
+      setFilteredApplications(filtered);
+    }
+  };
 
   const handleStatusChange = (id, status) => {
     setSelectedStatus(prevState => ({ ...prevState, [id]: status }));
@@ -78,6 +115,7 @@ const MCEvaluationList = () => {
         app.id === id ? { ...app, status } : app
       );
       setApplications(updatedApplications);
+      setFilteredApplications(updatedApplications);
     } catch (error) {
       console.log("Error al actualizar el estado", error);
       setSnackbarMessage("Error al actualizar el estado");
@@ -123,15 +161,30 @@ const MCEvaluationList = () => {
         <Typography variant="h4" component="h3" gutterBottom>
           Evaluación de Solicitudes de Crédito Hipotecario
         </Typography>
+        <Box display="flex" alignItems="center" gap="16px" marginTop="16px">
+          <TextField
+            label="Buscar por Usuario"
+            variant="outlined"
+            value={searchUser}
+            onChange={(e) => setSearchUser(e.target.value)}
+            fullWidth
+          />
+          <Button variant="contained" color="primary" onClick={handleSearch}>
+            Buscar
+          </Button>
+        </Box>
         <hr style={{ width: '100%' }} />
       </Box>
-      {applications.map(application => {
+      {filteredApplications.map(application => {
         const mcType = mcTypes.find(type => type.id === application.type);
         return (
           <Card key={application.id} variant="outlined" style={{ padding: '16px', marginTop: '16px', width: '100%' }}>
             <CardContent>
               <Typography variant="body1">
                 <strong>ID:</strong> {application.id}
+              </Typography>
+              <Typography variant="body1">
+                <strong>Usuario:</strong> {userNames[application.client] || 'Desconocido'}
               </Typography>
               <Typography variant="body1">
                 <strong>Tipo de Préstamo:</strong> {mcType ? mcType.type : "Desconocido"}
