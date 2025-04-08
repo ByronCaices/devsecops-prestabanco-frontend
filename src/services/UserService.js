@@ -8,8 +8,12 @@ const register = data => {
     return httpClient.post('/user/register',data)
 }
 
+const getAll = () => {
+    return httpClient.get('/user/getAll')
+}
+
 const getNameById = id => {
     return httpClient.get(`/user/getNameById/${id}`)
 }
 
-export default {login,register,getNameById};
+export default {login,register,getAll,getNameById};

@@ -66,24 +66,24 @@ const MCSimulation = () => {
 
   const simulateMC = (e) => {
     e.preventDefault();
-
+  
     const mcSimulation = {
       loanAmount: parseInt(loanAmount.replace(/\./g, '')),
       annualInterestRate: parseFloat(annualInterestRate),
       loanTerm: parseInt(loanTerm),
     };
-
+  
     setSimulationParams({
       loanAmount,
       annualInterestRate,
       loanTerm,
     });
-
+  
     setIsLoading(true);
     MCSimulationService
       .simulate(mcSimulation)
       .then((response) => {
-        setSimulationResult(response.data);
+        setSimulationResult(response.data); // Almacena todos los valores devueltos
         console.log("Simulación exitosa", response.data);
       })
       .catch((error) => {
@@ -239,15 +239,29 @@ const MCSimulation = () => {
             <strong>Monto del Préstamo:</strong> ${simulationParams.loanAmount}
           </Typography>
           <Typography>
-          <strong>Interés Anual:</strong> {simulationParams.annualInterestRate.toLocaleString()}%
+            <strong>Interés Anual:</strong> {simulationParams.annualInterestRate.toLocaleString()}%
           </Typography>
           <Typography>
             <strong>Plazo:</strong> {simulationParams.loanTerm} años
           </Typography>
-          <Typography variant="h6" mt={2}>
-          <strong>Valor Mensualidad (CLP):</strong> ${simulationResult.toLocaleString()}
+          <Typography>
+            <strong>Pago Mensual Bruto:</strong> ${simulationResult.mounthly_payment.toLocaleString()}
           </Typography>
-
+          <Typography>
+            <strong>Seguro de Gravamen:</strong> ${simulationResult.lien_insurance.toLocaleString()}
+          </Typography>
+          <Typography>
+            <strong>Seguro contra Incendios:</strong> ${simulationResult.fire_insurance.toLocaleString()}
+          </Typography>
+          <Typography>
+            <strong>Comisión Administrativa:</strong> ${simulationResult.administration_commission.toLocaleString()}
+          </Typography>
+          <Typography>
+            <strong>Costo Mensual Total:</strong> ${simulationResult.monthly_cost.toLocaleString()}
+          </Typography>
+          <Typography variant="h6" mt={2}>
+            <strong>Costo Total del Préstamo:</strong> ${simulationResult.total_cost.toLocaleString()}
+          </Typography>
         </>
       ) : (
         <Typography>
