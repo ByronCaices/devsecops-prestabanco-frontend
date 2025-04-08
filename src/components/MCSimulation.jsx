@@ -245,22 +245,22 @@ const MCSimulation = () => {
             <strong>Plazo:</strong> {simulationParams.loanTerm} años
           </Typography>
           <Typography>
-            <strong>Pago Mensual Bruto:</strong> ${simulationResult[0].toLocaleString()}
+            <strong>Pago Mensual Bruto:</strong> ${simulationResult.mounthly_payment.toLocaleString()}
           </Typography>
           <Typography>
-            <strong>Seguro de Gravamen:</strong> ${simulationResult[1].toLocaleString()}
+            <strong>Seguro de Gravamen:</strong> ${simulationResult.lien_insurance.toLocaleString()}
           </Typography>
           <Typography>
-            <strong>Seguro contra Incendios:</strong> ${simulationResult[2].toLocaleString()}
+            <strong>Seguro contra Incendios:</strong> ${simulationResult.fire_insurance.toLocaleString()}
           </Typography>
           <Typography>
-            <strong>Comisión Administrativa:</strong> ${simulationResult[3].toLocaleString()}
+            <strong>Comisión Administrativa:</strong> ${simulationResult.administration_commission.toLocaleString()}
           </Typography>
           <Typography>
-            <strong>Costo Mensual Total:</strong> ${simulationResult[4].toLocaleString()}
+            <strong>Costo Mensual Total:</strong> ${simulationResult.monthly_cost.toLocaleString()}
           </Typography>
           <Typography variant="h6" mt={2}>
-            <strong>Costo Total del Préstamo:</strong> ${simulationResult[5].toLocaleString()}
+            <strong>Costo Total del Préstamo:</strong> ${simulationResult.total_cost.toLocaleString()}
           </Typography>
         </>
       ) : (
