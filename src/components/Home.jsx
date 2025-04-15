@@ -27,7 +27,7 @@ const Home = () => {
       },
     ],
     client: [
-      { icon: <MonetizationOnIcon />, title: 'Simula tu Crédito', path: '/simulation', description: 'Obtén un cálculo estimado de tu crédito hipotecario.' },
+      { icon: <MonetizationOnIcon />, title: 'SSSimula tu Crédito', path: '/simulation', description: 'Obtén un cálculo estimado de tu crédito hipotecario.' },
       { icon: <RequestQuoteIcon />, title: 'Solicita tu Crédito', path: '/mcapplication', description: 'Inicia tu solicitud de crédito hipotecario.' },
       { icon: <ChecklistIcon />, title: 'Haz Seguimiento', path: '/tracking', description: 'Revisa el estado de tus solicitudes.' },
       { icon: <CalculateIcon />, title: 'Calcula Costos', path: '/calculateAnnualCosts', description: 'Obtén un análisis detallado de costos anuales.' }
